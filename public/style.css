@@ -499,4 +499,347 @@ footer a:hover {
 .alert-info {
     background: var(--primary-gradient);
     border: none;
+}
+
+/* WhatsApp Subscription Section */
+.subscription-section {
+    background: var(--bg-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.subscription-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(37, 211, 102, 0.1) 0%, rgba(37, 211, 102, 0.05) 100%);
+    z-index: 1;
+}
+
+.subscription-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    z-index: 2;
+    transition: var(--transition);
+}
+
+.subscription-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.whatsapp-icon {
+    font-size: 4rem;
+    color: #25d366;
+    text-shadow: 0 0 20px rgba(37, 211, 102, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.subscription-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subscription-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.subscription-features {
+    margin: 2rem 0;
+}
+
+.feature-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: var(--darker-gradient);
+    border-radius: 25px;
+    color: var(--text-primary);
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.feature-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
+}
+
+.subscription-btn {
+    background: linear-gradient(135deg, #25d366 0%, #20bf5a 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+}
+
+.subscription-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.subscription-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+    background: linear-gradient(135deg, #20bf5a 0%, #1da851 100%);
+}
+
+.subscription-btn:hover::before {
+    left: 100%;
+}
+
+.subscription-note {
+    color: var(--text-muted);
+    margin-top: 1rem;
+}
+
+/* Subscription Modal */
+.subscription-modal .modal-content {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.subscription-modal .modal-header {
+    background: var(--darker-gradient);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.subscription-modal .modal-title {
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+
+.whatsapp-large-icon {
+    font-size: 5rem;
+    color: #25d366;
+    text-shadow: 0 0 30px rgba(37, 211, 102, 0.6);
+    animation: pulse 2s infinite;
+}
+
+.modal-subtitle {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.modal-description {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.subscription-modal .form-label {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.subscription-modal .form-control {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 10px;
+    transition: var(--transition);
+}
+
+.subscription-modal .form-control:focus {
+    background: var(--bg-secondary);
+    border-color: #25d366;
+    box-shadow: 0 0 0 0.2rem rgba(37, 211, 102, 0.25);
+    color: var(--text-primary);
+}
+
+.subscription-modal .form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.subscription-modal .input-group-text {
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+}
+
+.subscription-modal .form-text {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.subscription-modal .form-check-input {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+.subscription-modal .form-check-input:checked {
+    background-color: #25d366;
+    border-color: #25d366;
+}
+
+.subscription-modal .form-check-label {
+    color: var(--text-secondary);
+}
+
+.subscription-modal .form-check-label a {
+    color: var(--accent-teal);
+    text-decoration: underline;
+}
+
+.subscription-btn-modal {
+    background: linear-gradient(135deg, #25d366 0%, #20bf5a 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    transition: var(--transition);
+    box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+}
+
+.subscription-btn-modal:hover {
+    background: linear-gradient(135deg, #20bf5a 0%, #1da851 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+}
+
+.subscription-benefits {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.subscription-benefits h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.subscription-benefits small {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Success Modal */
+.success-modal .modal-content {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.success-icon {
+    font-size: 5rem;
+    color: #25d366;
+    text-shadow: 0 0 30px rgba(37, 211, 102, 0.6);
+    animation: successPulse 1.5s ease-in-out;
+}
+
+.success-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.success-message {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.success-details {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.success-phone, .success-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Animations */
+@keyframes successPulse {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Subscription Responsive Design */
+@media (max-width: 768px) {
+    .subscription-title {
+        font-size: 1.8rem;
+    }
+    
+    .subscription-subtitle {
+        font-size: 1rem;
+    }
+    
+    .whatsapp-icon {
+        font-size: 3rem;
+    }
+    
+    .whatsapp-large-icon {
+        font-size: 4rem;
+    }
+    
+    .feature-item {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .subscription-btn {
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .subscription-card {
+        margin: 0 1rem;
+    }
+    
+    .subscription-title {
+        font-size: 1.5rem;
+    }
+    
+    .modal-subtitle {
+        font-size: 1.3rem;
+    }
+    
+    .success-title {
+        font-size: 1.5rem;
+    }
 } 

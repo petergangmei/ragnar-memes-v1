@@ -8,6 +8,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -49,6 +52,46 @@
         </div>
     </div>
 
+    <!-- WhatsApp Subscription Section -->
+    <div class="subscription-section py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="subscription-card p-4 rounded-4">
+                        <div class="whatsapp-icon mb-3">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h2 class="subscription-title mb-3">Get Daily Memes on WhatsApp! 📱</h2>
+                        <p class="subscription-subtitle mb-4">
+                            Never miss a laugh! Subscribe to receive fresh, hilarious memes directly to your WhatsApp every day. 
+                            It's free, fun, and guaranteed to brighten your day! 🤣
+                        </p>
+                        <div class="subscription-features mb-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-2">
+                                    <span class="feature-item">🎯 Daily Delivery</span>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <span class="feature-item">📱 WhatsApp Direct</span>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <span class="feature-item">🆓 100% Free</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn subscription-btn btn-lg px-5" data-bs-toggle="modal" data-bs-target="#subscriptionModal">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            Subscribe Now - It's Free!
+                        </button>
+                        <p class="subscription-note mt-3">
+                            <small>🔒 Your number is safe with us. Unsubscribe anytime!</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Spinner -->
     <div id="loadingSpinner" class="loading-container text-center d-none">
         <div class="spinner-border" role="status">
@@ -75,6 +118,130 @@
             </div>
         </div>
     </footer>
+
+    <!-- Subscription Modal -->
+    <div class="modal fade" id="subscriptionModal" tabindex="-1" aria-labelledby="subscriptionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content subscription-modal">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="subscriptionModalLabel">
+                        <i class="fab fa-whatsapp text-success me-2"></i>
+                        Subscribe for Daily Memes
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <div class="whatsapp-large-icon mb-3">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <h4 class="modal-subtitle">Join 10,000+ Happy Subscribers! 🎉</h4>
+                        <p class="modal-description">
+                            Get the funniest memes delivered to your WhatsApp every morning at 9 AM.
+                            No spam, just pure entertainment!
+                        </p>
+                    </div>
+                    
+                    <form id="subscriptionForm">
+                        <div class="mb-3">
+                            <label for="whatsappNumber" class="form-label">WhatsApp Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-success text-white">
+                                    <i class="fab fa-whatsapp"></i>
+                                </span>
+                                <input type="tel" 
+                                       class="form-control form-control-lg" 
+                                       id="whatsappNumber" 
+                                       placeholder="Enter your WhatsApp number"
+                                       required>
+                            </div>
+                            <div class="form-text">
+                                Include country code (e.g., +1234567890)
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subscriberName" class="form-label">Your Name (Optional)</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="subscriberName" 
+                                   placeholder="What should we call you?">
+                        </div>
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                I agree to receive daily memes and accept the 
+                                <a href="./terms/" target="_blank" class="text-decoration-none">Terms of Service</a> 
+                                and 
+                                <a href="./privacy/" target="_blank" class="text-decoration-none">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn subscription-btn-modal w-100 btn-lg">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            Start My Daily Memes!
+                        </button>
+                    </form>
+                    
+                    <div class="subscription-benefits mt-4">
+                        <h6 class="mb-3">What You'll Get:</h6>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <small><i class="fas fa-check-circle text-success me-2"></i>Daily fresh memes</small>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <small><i class="fas fa-check-circle text-success me-2"></i>Curated content</small>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <small><i class="fas fa-check-circle text-success me-2"></i>No ads or spam</small>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <small><i class="fas fa-check-circle text-success me-2"></i>Unsubscribe anytime</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content success-modal">
+                <div class="modal-body text-center p-5">
+                    <div class="success-icon mb-4">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="success-title mb-3">Welcome to the Meme Family! 🎉</h3>
+                    <p class="success-message mb-4">
+                        Awesome! You're now subscribed to daily memes on WhatsApp. 
+                        Expect your first dose of laughter tomorrow morning at 9 AM!
+                    </p>
+                    <div class="success-details mb-4">
+                        <div class="success-phone mb-2">
+                            <i class="fab fa-whatsapp text-success me-2"></i>
+                            <span id="confirmedPhone"></span>
+                        </div>
+                        <div class="success-name">
+                            <i class="fas fa-user text-primary me-2"></i>
+                            <span id="confirmedName"></span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success btn-lg" data-bs-dismiss="modal">
+                        <i class="fas fa-thumbs-up me-2"></i>
+                        Awesome, Thanks!
+                    </button>
+                    <p class="mt-3">
+                        <small class="text-muted">
+                            You can unsubscribe anytime by replying "STOP" to any meme message.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

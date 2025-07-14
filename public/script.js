@@ -459,9 +459,196 @@ class MemeApp {
     }
 }
 
+// WhatsApp Subscription Class
+class SubscriptionManager {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        // Add event listeners
+        const subscriptionForm = document.getElementById('subscriptionForm');
+        if (subscriptionForm) {
+            subscriptionForm.addEventListener('submit', (e) => this.handleSubscription(e));
+        }
+
+        // Add phone number formatting
+        const phoneInput = document.getElementById('whatsappNumber');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => this.formatPhoneNumber(e));
+        }
+    }
+
+    formatPhoneNumber(event) {
+        let value = event.target.value;
+        
+        // Keep only digits and the + sign at the beginning
+        value = value.replace(/[^\d+]/g, '');
+        
+        // Ensure + is only at the beginning
+        if (value.includes('+')) {
+            const plusIndex = value.indexOf('+');
+            const digits = value.replace(/\+/g, '');
+            value = plusIndex === 0 ? '+' + digits : '+' + digits;
+        }
+        
+        // Add + at the beginning if not present and value is not empty
+        if (value && !value.startsWith('+') && value.length > 0) {
+            value = '+' + value;
+        }
+        
+        event.target.value = value;
+    }
+
+    validatePhoneNumber(phoneNumber) {
+        // Basic validation for international phone numbers
+        const phoneRegex = /^\+[1-9]\d{1,14}$/;
+        return phoneRegex.test(phoneNumber);
+    }
+
+    async handleSubscription(event) {
+        event.preventDefault();
+        
+        const phoneNumber = document.getElementById('whatsappNumber').value.trim();
+        const subscriberName = document.getElementById('subscriberName').value.trim() || 'Friend';
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+
+        // Validation
+        if (!phoneNumber) {
+            this.showError('Please enter your WhatsApp number');
+            return;
+        }
+
+        if (!this.validatePhoneNumber(phoneNumber)) {
+            this.showError('Please enter a valid phone number with country code (e.g., +1234567890)');
+            return;
+        }
+
+        if (!agreeTerms) {
+            this.showError('Please agree to the terms and conditions');
+            return;
+        }
+
+        // Simulate subscription process
+        this.showLoadingState(true);
+        
+        try {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Store subscription data (in real app, this would go to a server)
+            const subscriptionData = {
+                phoneNumber,
+                subscriberName,
+                subscribedAt: new Date().toISOString(),
+                isActive: true
+            };
+
+            // For demo purposes, store in localStorage
+            localStorage.setItem('ragnar_subscription', JSON.stringify(subscriptionData));
+
+            // Show success
+            this.showSuccess(phoneNumber, subscriberName);
+            this.resetForm();
+            
+        } catch (error) {
+            this.showError('Something went wrong. Please try again.');
+        } finally {
+            this.showLoadingState(false);
+        }
+    }
+
+    showSuccess(phoneNumber, subscriberName) {
+        // Hide subscription modal
+        const subscriptionModal = bootstrap.Modal.getInstance(document.getElementById('subscriptionModal'));
+        if (subscriptionModal) {
+            subscriptionModal.hide();
+        }
+
+        // Update success modal content
+        document.getElementById('confirmedPhone').textContent = phoneNumber;
+        document.getElementById('confirmedName').textContent = subscriberName;
+
+        // Show success modal
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+
+        // Add confetti effect
+        this.triggerConfetti();
+    }
+
+    triggerConfetti() {
+        // Simple confetti effect using CSS animations
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = ['#25d366', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'][Math.floor(Math.random() * 5)];
+            confetti.style.borderRadius = '50%';
+            confetti.style.animation = `confettiFall ${2 + Math.random() * 3}s linear forwards`;
+            confetti.style.zIndex = '9999';
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                if (confetti.parentNode) {
+                    confetti.remove();
+                }
+            }, 5000);
+        }
+    }
+
+    showError(message) {
+        const existingAlert = document.querySelector('.subscription-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger subscription-alert mt-3';
+        alert.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            ${message}
+        `;
+
+        const form = document.getElementById('subscriptionForm');
+        form.parentNode.insertBefore(alert, form.nextSibling);
+
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    showLoadingState(loading) {
+        const submitBtn = document.querySelector('.subscription-btn-modal');
+        const originalText = submitBtn.innerHTML;
+
+        if (loading) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Subscribing...
+            `;
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    resetForm() {
+        document.getElementById('subscriptionForm').reset();
+    }
+}
+
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const app = new MemeApp();
+    const subscriptionManager = new SubscriptionManager();
     
     // Add scroll animations
     app.addScrollAnimations();
@@ -507,6 +694,13 @@ document.addEventListener('DOMContentLoaded', () => {
         .btn-close:hover {
             background: rgba(0, 0, 0, 0.1) !important;
             transform: scale(1.1);
+        }
+        
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
     `;
     document.head.appendChild(style);
