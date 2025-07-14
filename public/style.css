@@ -192,6 +192,17 @@ body {
     object-fit: cover;
     transition: var(--transition);
     border-radius: var(--border-radius) var(--border-radius) 0 0;
+    background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.card-img-top[src*="data:image/svg"] {
+    object-fit: contain;
+    background: none;
 }
 
 .meme-card:hover .card-img-top {

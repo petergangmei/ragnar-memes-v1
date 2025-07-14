@@ -29,31 +29,63 @@ class MemeApp {
             const batchSize = 10;
             const totalMemes = 50;
             let allMemes = [];
+            let retryCount = 0;
+            const maxRetries = 3;
             
             for (let batch = 0; batch < Math.ceil(totalMemes / batchSize); batch++) {
-                const batchPromises = [];
-                const currentBatchSize = Math.min(batchSize, totalMemes - (batch * batchSize));
-                
-                for (let i = 0; i < currentBatchSize; i++) {
-                    batchPromises.push(this.fetchRandomMeme());
-                }
-                
-                const batchMemes = await Promise.all(batchPromises);
-                allMemes = allMemes.concat(batchMemes);
-                
-                // Display memes as they load
-                this.displayMemes(batchMemes, batch * batchSize);
-                
-                // Update loading progress
-                this.updateLoadingProgress((batch + 1) * batchSize, totalMemes);
-                
-                // Small delay between batches to improve perceived performance
-                if (batch < Math.ceil(totalMemes / batchSize) - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                try {
+                    const batchPromises = [];
+                    const currentBatchSize = Math.min(batchSize, totalMemes - (batch * batchSize));
+                    
+                    for (let i = 0; i < currentBatchSize; i++) {
+                        batchPromises.push(this.fetchRandomMeme());
+                    }
+                    
+                    const batchMemes = await Promise.allSettled(batchPromises);
+                    const validMemes = batchMemes
+                        .filter(result => result.status === 'fulfilled')
+                        .map(result => result.value);
+                    
+                    if (validMemes.length > 0) {
+                        allMemes = allMemes.concat(validMemes);
+                        
+                        // Display memes as they load
+                        this.displayMemes(validMemes, allMemes.length - validMemes.length);
+                        
+                        // Update loading progress
+                        this.updateLoadingProgress(allMemes.length, totalMemes);
+                        
+                        // Reset retry count on successful batch
+                        retryCount = 0;
+                    } else if (retryCount < maxRetries) {
+                        // Retry this batch
+                        retryCount++;
+                        batch--;
+                        console.log(`Retrying batch ${batch + 1}, attempt ${retryCount}`);
+                        continue;
+                    }
+                    
+                    // Small delay between batches to improve perceived performance
+                    if (batch < Math.ceil(totalMemes / batchSize) - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 150));
+                    }
+                } catch (batchError) {
+                    console.error(`Error in batch ${batch}:`, batchError);
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        batch--;
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
                 }
             }
             
-            this.showSuccessMessage();
+            // Show success message only if we got some memes
+            if (allMemes.length > 0) {
+                this.showSuccessMessage();
+                console.log(`Successfully loaded ${allMemes.length} memes`);
+            } else {
+                throw new Error('No memes were loaded successfully');
+            }
             
         } catch (error) {
             console.error('Error loading memes:', error);
@@ -66,13 +98,39 @@ class MemeApp {
     async fetchRandomMeme() {
         // Using imgflip API for random memes
         if (!this.memeCache) {
-            const response = await fetch('https://api.imgflip.com/get_memes');
-            const data = await response.json();
-            
-            if (data.success) {
-                this.memeCache = data.data.memes;
-            } else {
-                throw new Error('Failed to fetch meme');
+            try {
+                const response = await fetch('https://api.imgflip.com/get_memes', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.memes) {
+                    // Filter out potentially broken memes and ensure they have valid URLs
+                    this.memeCache = data.data.memes.filter(meme => 
+                        meme.url && 
+                        meme.url.startsWith('http') && 
+                        meme.name && 
+                        !meme.url.includes('imgflip.com/s/')  // Avoid small thumbnails
+                    );
+                    
+                    if (this.memeCache.length === 0) {
+                        throw new Error('No valid memes found');
+                    }
+                } else {
+                    throw new Error('Failed to fetch meme data');
+                }
+            } catch (error) {
+                console.error('Error fetching memes:', error);
+                // Fallback to a backup set of memes if API fails
+                this.memeCache = this.getBackupMemes();
             }
         }
         
@@ -87,6 +145,37 @@ class MemeApp {
         
         this.loadedMemes.add(meme.id);
         return meme;
+    }
+
+    getBackupMemes() {
+        // Backup memes in case API fails
+        return [
+            {
+                id: "181913649",
+                name: "Drake Pointing",
+                url: "https://i.imgflip.com/30b1gx.jpg"
+            },
+            {
+                id: "87743020",
+                name: "Two Buttons",
+                url: "https://i.imgflip.com/1g8my4.jpg"
+            },
+            {
+                id: "112126428",
+                name: "Distracted Boyfriend",
+                url: "https://i.imgflip.com/1ur9b0.jpg"
+            },
+            {
+                id: "131087935",
+                name: "Running Away Balloon",
+                url: "https://i.imgflip.com/261o3j.jpg"
+            },
+            {
+                id: "4087833",
+                name: "Waiting Skeleton",
+                url: "https://i.imgflip.com/2fm6x.jpg"
+            }
+        ];
     }
 
     displayMemes(memes, startIndex = 0) {
@@ -110,7 +199,7 @@ class MemeApp {
         
         col.innerHTML = `
             <div class="card meme-card h-100">
-                <img src="${meme.url}" class="card-img-top" alt="${meme.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"300\" viewBox=\"0 0 400 300\"><rect width=\"400\" height=\"300\" fill=\"%23f8f9fa\"/><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" dy=\".3em\" fill=\"%236c757d\" font-family=\"Arial\" font-size=\"18\">Failed to load meme</text></svg>'">
+                <img src="${meme.url}" class="card-img-top" alt="${meme.name}" loading="lazy" onerror="this.handleImageError(this)" onload="this.style.opacity='1'">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${this.truncateText(meme.name, 50)}</h5>
                     <div class="mt-auto">
@@ -128,6 +217,17 @@ class MemeApp {
         // Set animation index for staggered animations
         col.style.setProperty('--animation-index', index + 1);
         
+        // Add image error handling
+        const img = col.querySelector('img');
+        img.style.opacity = '0';
+        img.style.transition = 'opacity 0.3s ease';
+        
+        // Set up image error handling
+        img.addEventListener('error', () => this.handleImageError(img, meme));
+        img.addEventListener('load', () => {
+            img.style.opacity = '1';
+        });
+        
         // Add click handler for the entire card
         col.addEventListener('click', (e) => {
             if (!e.target.closest('.view-full-btn')) {
@@ -136,6 +236,38 @@ class MemeApp {
         });
         
         return col;
+    }
+
+    handleImageError(img, meme) {
+        // Create a better fallback image
+        const fallbackSvg = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="280" viewBox="0 0 400 280">
+            <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:%23667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:%23764ba2;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect width="400" height="280" fill="url(%23grad)"/>
+            <circle cx="200" cy="100" r="30" fill="rgba(255,255,255,0.3)"/>
+            <rect x="170" y="150" width="60" height="8" rx="4" fill="rgba(255,255,255,0.5)"/>
+            <rect x="150" y="170" width="100" height="6" rx="3" fill="rgba(255,255,255,0.3)"/>
+            <text x="200" y="210" text-anchor="middle" fill="white" font-family="Arial" font-size="14" font-weight="bold">🎭 ${meme.name}</text>
+            <text x="200" y="230" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial" font-size="10">Meme Template</text>
+        </svg>`;
+        
+        img.src = fallbackSvg;
+        img.style.opacity = '1';
+        
+        // Try to reload the original image after a delay
+        setTimeout(() => {
+            if (meme.url && meme.url !== img.src) {
+                const testImg = new Image();
+                testImg.onload = () => {
+                    img.src = meme.url;
+                };
+                testImg.src = meme.url;
+            }
+        }, 2000);
     }
 
     showLoading(show) {
@@ -159,18 +291,21 @@ class MemeApp {
 
     showError() {
         this.memesGrid.innerHTML = `
-            <div class="col-12">
+            <div class="w-100">
                 <div class="alert alert-danger text-center error-container" role="alert">
-                    <h4 class="alert-heading">🚫 Oops!</h4>
-                    <p class="mb-3">Failed to load memes. This might be a temporary issue.</p>
+                    <h4 class="alert-heading">🚫 Connection Issue!</h4>
+                    <p class="mb-3">Having trouble loading memes. This could be due to network issues or API limits.</p>
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
-                        <button class="btn btn-light" onclick="this.parentElement.parentElement.parentElement.parentElement.querySelector('#loadMemes').click()">
+                        <button class="btn btn-light" onclick="document.getElementById('loadMemes').click()">
                             🔄 Try Again
                         </button>
                         <button class="btn btn-outline-light" onclick="location.reload()">
                             🔃 Refresh Page
                         </button>
                     </div>
+                    <small class="d-block mt-2 text-white-50">
+                        Tip: Try refreshing the page or check your internet connection
+                    </small>
                 </div>
             </div>
         `;
