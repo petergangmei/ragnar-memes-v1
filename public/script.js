@@ -7,6 +7,7 @@ class MemeApp {
         this.loadingSpinner = document.getElementById('loadingSpinner');
         this.memeCache = null;
         this.loadedMemes = new Set(); // Track loaded memes to avoid duplicates
+        this.selectedSubreddit = 'random'; // Default to mixed subreddits
         this.init();
     }
 
@@ -17,6 +18,25 @@ class MemeApp {
         // Add event listener to load button
         this.loadButton.addEventListener('click', () => {
             this.loadMemes();
+        });
+
+        // Add event listeners for subreddit selection
+        this.initSubredditSelection();
+    }
+
+    initSubredditSelection() {
+        const subredditButtons = document.querySelectorAll('.subreddit-btn');
+        subredditButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                subredditButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+                // Update selected subreddit
+                this.selectedSubreddit = button.dataset.subreddit;
+                // Load new memes
+                this.loadMemes();
+            });
         });
     }
 
@@ -96,55 +116,98 @@ class MemeApp {
     }
 
     async fetchRandomMeme() {
-        // Using imgflip API for random memes
-        if (!this.memeCache) {
-            try {
-                const response = await fetch('https://api.imgflip.com/get_memes', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.success && data.data && data.data.memes) {
-                    // Filter out potentially broken memes and ensure they have valid URLs
-                    this.memeCache = data.data.memes.filter(meme => 
-                        meme.url && 
-                        meme.url.startsWith('http') && 
-                        meme.name && 
-                        !meme.url.includes('imgflip.com/s/')  // Avoid small thumbnails
-                    );
-                    
-                    if (this.memeCache.length === 0) {
-                        throw new Error('No valid memes found');
-                    }
-                } else {
-                    throw new Error('Failed to fetch meme data');
-                }
-            } catch (error) {
-                console.error('Error fetching memes:', error);
-                // Fallback to a backup set of memes if API fails
-                this.memeCache = this.getBackupMemes();
-            }
+        // Using Reddit meme API for fresh memes
+        let targetSubreddit;
+        
+        if (this.selectedSubreddit === 'random') {
+            const subreddits = ['memes', 'dankmemes', 'ProgrammerHumor', 'wholesomememes', 'funny'];
+            targetSubreddit = subreddits[Math.floor(Math.random() * subreddits.length)];
+        } else {
+            targetSubreddit = this.selectedSubreddit;
         }
         
-        // Try to find a unique meme
-        let attempts = 0;
-        let meme;
-        do {
-            const randomIndex = Math.floor(Math.random() * this.memeCache.length);
-            meme = this.memeCache[randomIndex];
-            attempts++;
-        } while (this.loadedMemes.has(meme.id) && attempts < 10);
+        try {
+            const response = await fetch(`https://meme-api.com/gimme/${targetSubreddit}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const meme = await response.json();
+            
+            // Validate the meme data
+            if (!meme.url || !meme.title) {
+                throw new Error('Invalid meme data received');
+            }
+            
+            // Check if we've already loaded this meme
+            if (this.loadedMemes.has(meme.postLink)) {
+                // Try to get a different meme with a retry limit
+                if (this.loadedMemes.size < 100) { // Retry only if we haven't loaded too many
+                    return await this.fetchRandomMeme();
+                }
+            }
+            
+            // Transform Reddit meme data to match our expected format
+            const transformedMeme = {
+                id: meme.postLink,
+                name: meme.title,
+                url: meme.url,
+                postLink: meme.postLink,
+                subreddit: meme.subreddit,
+                author: meme.author,
+                ups: meme.ups || 0
+            };
+            
+            this.loadedMemes.add(meme.postLink);
+            return transformedMeme;
+            
+        } catch (error) {
+            console.error('Error fetching Reddit meme:', error);
+            // Fallback to backup memes if Reddit API fails
+            return this.getBackupRedditMeme();
+        }
+    }
+
+    getBackupRedditMeme() {
+        // Backup Reddit-style memes for when API fails
+        const backupMemes = [
+            {
+                id: 'backup-1',
+                name: 'When you finally fix that bug that\'s been haunting you for weeks',
+                url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYzNjM2Q7c3RvcC1vcGFjaXR5OjEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM1YjViNWM7c3RvcC1vcGFjaXR5OjEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfkIEgUHJvZ3JhbW1lciBIdW1vcjwvdGV4dD48L3N2Zz4=',
+                postLink: 'https://reddit.com/r/ProgrammerHumor',
+                subreddit: 'ProgrammerHumor',
+                author: 'backup_user',
+                ups: 1337
+            },
+            {
+                id: 'backup-2',
+                name: 'Me explaining to my rubber duck why my code doesn\'t work',
+                url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImIiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMyNGQ0NjY7c3RvcC1vcGFjaXR5OjEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMxZGE4NTE7c3RvcC1vcGFjaXR5OjEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2IpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfpIIgci9tZW1lczwvdGV4dD48L3N2Zz4=',
+                postLink: 'https://reddit.com/r/memes',
+                subreddit: 'memes',
+                author: 'backup_user',
+                ups: 2048
+            },
+            {
+                id: 'backup-3',
+                name: 'When your code works on the first try',
+                url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImMiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZjZiNmI7c3RvcC1vcGFjaXR5OjEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZjg3ODc7c3RvcC1vcGFjaXR5OjEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2MpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfkoAgci9kYW5rbWVtZXM8L3RleHQ+PC9zdmc+',
+                postLink: 'https://reddit.com/r/dankmemes',
+                subreddit: 'dankmemes',
+                author: 'backup_user',
+                ups: 9001
+            }
+        ];
         
-        this.loadedMemes.add(meme.id);
-        return meme;
+        const randomIndex = Math.floor(Math.random() * backupMemes.length);
+        return backupMemes[randomIndex];
     }
 
     getBackupMemes() {
@@ -202,12 +265,35 @@ class MemeApp {
                 <img src="${meme.url}" class="card-img-top" alt="${meme.name}" loading="lazy" onerror="this.handleImageError(this)" onload="this.style.opacity='1'">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${this.truncateText(meme.name, 50)}</h5>
+                    <div class="meme-meta mb-2">
+                        <div class="d-flex justify-content-between align-items-center text-muted small">
+                            <span class="subreddit-badge">
+                                <i class="fab fa-reddit-alien me-1"></i>
+                                r/${meme.subreddit || 'memes'}
+                            </span>
+                            <span class="upvotes">
+                                <i class="fas fa-arrow-up me-1"></i>
+                                ${this.formatUpvotes(meme.ups || 0)}
+                            </span>
+                        </div>
+                        <div class="author-info mt-1">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                u/${meme.author || 'unknown'}
+                            </small>
+                        </div>
+                    </div>
                     <div class="mt-auto">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="meme-number">Meme #${index + 1}</span>
-                            <button class="btn view-full-btn btn-sm" onclick="window.open('${meme.url}', '_blank')" aria-label="View full meme">
-                                🔗 View Full
-                            </button>
+                            <div class="btn-group">
+                                <button class="btn view-full-btn btn-sm" onclick="window.open('${meme.url}', '_blank')" aria-label="View full meme">
+                                    🔗 View
+                                </button>
+                                ${meme.postLink ? `<button class="btn reddit-btn btn-sm" onclick="window.open('${meme.postLink}', '_blank')" aria-label="View on Reddit">
+                                    <i class="fab fa-reddit"></i>
+                                </button>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -314,6 +400,15 @@ class MemeApp {
     truncateText(text, maxLength) {
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
+    }
+
+    formatUpvotes(upvotes) {
+        if (upvotes >= 1000000) {
+            return (upvotes / 1000000).toFixed(1) + 'M';
+        } else if (upvotes >= 1000) {
+            return (upvotes / 1000).toFixed(1) + 'k';
+        }
+        return upvotes.toString();
     }
 
     showMemeModal(meme) {

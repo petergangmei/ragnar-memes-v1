@@ -45,7 +45,37 @@
     <div class="hero-section text-white py-5">
         <div class="container text-center hero-content">
             <h1 class="display-4 hero-title">Welcome to Ragnar</h1>
-            <p class="lead hero-subtitle">Your daily dose of free jokes and memes!</p>
+            <p class="lead hero-subtitle">Your daily dose of fresh Reddit memes!</p>
+            
+            <!-- Subreddit Selection -->
+            <div class="subreddit-selection mb-4">
+                <h5 class="mb-3">Choose Your Meme Category:</h5>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <button class="btn subreddit-btn active" data-subreddit="random">
+                                <i class="fas fa-random me-2"></i>Mixed
+                            </button>
+                            <button class="btn subreddit-btn" data-subreddit="memes">
+                                <i class="fas fa-laugh me-2"></i>r/memes
+                            </button>
+                            <button class="btn subreddit-btn" data-subreddit="dankmemes">
+                                <i class="fas fa-fire me-2"></i>r/dankmemes
+                            </button>
+                            <button class="btn subreddit-btn" data-subreddit="ProgrammerHumor">
+                                <i class="fas fa-code me-2"></i>r/ProgrammerHumor
+                            </button>
+                            <button class="btn subreddit-btn" data-subreddit="wholesomememes">
+                                <i class="fas fa-heart me-2"></i>r/wholesomememes
+                            </button>
+                            <button class="btn subreddit-btn" data-subreddit="funny">
+                                <i class="fas fa-smile me-2"></i>r/funny
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <button id="loadMemes" class="btn hero-button btn-lg mt-3">
                 <span class="button-text">Load Fresh Memes</span>
             </button>

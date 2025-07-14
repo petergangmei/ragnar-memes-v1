@@ -152,6 +152,66 @@ body {
     left: 100%;
 }
 
+/* Subreddit Selection */
+.subreddit-selection {
+    margin: 2rem 0;
+}
+
+.subreddit-selection h5 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.subreddit-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    margin: 0.25rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.subreddit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.subreddit-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-teal);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.subreddit-btn:hover::before {
+    left: 100%;
+}
+
+.subreddit-btn.active {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.subreddit-btn.active:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
 /* Enhanced Meme Cards */
 .meme-card {
     background: var(--bg-secondary);
@@ -797,6 +857,72 @@ footer a:hover {
     }
 }
 
+/* Reddit Meme Styling */
+.meme-meta {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+}
+
+.subreddit-badge {
+    background: var(--darker-gradient);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+    color: var(--text-primary) !important;
+}
+
+.subreddit-badge .fa-reddit-alien {
+    color: #ff4500;
+}
+
+.upvotes {
+    color: var(--accent-teal) !important;
+    font-weight: 500;
+}
+
+.upvotes .fa-arrow-up {
+    color: #ff8b60;
+}
+
+.author-info {
+    color: var(--text-muted) !important;
+}
+
+.reddit-btn {
+    background: #ff4500;
+    border: none;
+    color: white;
+    margin-left: 0.25rem;
+    transition: var(--transition);
+}
+
+.reddit-btn:hover {
+    background: #cc3700;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.view-full-btn {
+    background: var(--success-gradient);
+    border: none;
+    color: white;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    transition: var(--transition);
+}
+
+.view-full-btn:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+}
+
 /* Subscription Responsive Design */
 @media (max-width: 768px) {
     .subscription-title {
@@ -823,6 +949,25 @@ footer a:hover {
     .subscription-btn {
         font-size: 0.9rem;
         padding: 0.75rem 1.5rem;
+    }
+
+    .meme-meta {
+        font-size: 0.8rem;
+    }
+    
+    .subreddit-badge {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .subreddit-btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        margin: 0.2rem;
+    }
+
+    .subreddit-selection h5 {
+        font-size: 1.1rem;
     }
 }
 
